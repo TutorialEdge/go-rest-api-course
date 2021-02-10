@@ -13,7 +13,7 @@ type Service struct {
 
 // Comment -
 type Comment struct {
-	ID      string
+	gorm.Model
 	Slug    string
 	Body    string
 	Author  string
@@ -22,10 +22,10 @@ type Comment struct {
 
 // CommentService -
 type CommentService interface {
-	GetComment(ID string) (Comment, error)
+	GetComment(ID uint) (Comment, error)
 	PostComment(comment Comment) (Comment, error)
-	UpdateComment(comment Comment) (Comment, error)
-	DeleteComment(comment Comment) error
+	UpdateComment(ID uint, newComment Comment) (Comment, error)
+	DeleteComment(ID uint) error
 	GetAllComments() ([]Comment, error)
 }
 
@@ -37,26 +37,48 @@ func NewService(db *gorm.DB) *Service {
 }
 
 // GetComment -
-func (s *Service) GetComment(id string) (Comment, error) {
-	return Comment{}, nil
+func (s *Service) GetComment(ID uint) (Comment, error) {
+	var comment Comment
+	if result := s.DB.First(&comment, ID); result.Error != nil {
+		return Comment{}, result.Error
+	}
+	return comment, nil
 }
 
 // PostComment -
 func (s *Service) PostComment(comment Comment) (Comment, error) {
-	return Comment{}, nil
+	if result := s.DB.Save(&comment); result.Error != nil {
+		return Comment{}, result.Error
+	}
+	return comment, nil
 }
 
 // UpdateComment -
-func (s *Service) UpdateComment(comment Comment) (Comment, error) {
-	return Comment{}, nil
+func (s *Service) UpdateComment(ID uint, newComment Comment) (Comment, error) {
+	comment, err := s.GetComment(ID)
+	if err != nil {
+		return Comment{}, err
+	}
+
+	if result := s.DB.Model(&comment).Updates(newComment); result.Error != nil {
+		return Comment{}, result.Error
+	}
+	return comment, nil
 }
 
 // DeleteComment -
-func (s *Service) DeleteComment(comment Comment) (Comment, error) {
+func (s *Service) DeleteComment(ID uint) (Comment, error) {
+	if result := s.DB.Delete(&Comment{}, ID); result.Error != nil {
+		return Comment{}, result.Error
+	}
 	return Comment{}, nil
 }
 
 // GetAllComments -
 func (s *Service) GetAllComments() ([]Comment, error) {
-	return []Comment{}, nil
+	var comments []Comment
+	if result := s.DB.Find(&comments); result.Error != nil {
+		return comments, result.Error
+	}
+	return comments, nil
 }

@@ -16,21 +16,30 @@ type App struct{}
 func (app *App) Run() error {
 	fmt.Println("Setting Up Our APP")
 
+	// set up our new database connection
 	var err error
 	db, err := database.NewDatabase()
 	if err != nil {
 		return err
 	}
 
+	if err = database.MigrateDB(db); err != nil {
+		return err
+	}
+
+	// create out comment service which needs a connection
+	// to the database
 	commentService := comment.NewService(db)
-	handler := transportHTTP.NewHandler(&commentService)
+
+	// expose our comment service by wrapping it in a http router
+	handler := transportHTTP.NewHandler(commentService)
 	handler.SetupRoutes()
 
+	// finally, start listening on port 8080 and handle the errors
 	if err := http.ListenAndServe(":8080", handler.Router); err != nil {
 		fmt.Println("Failed to set up server")
 		return err
 	}
-
 	return nil
 }
 
