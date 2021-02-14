@@ -86,9 +86,13 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	comment, err := h.Service.PostComment(comment.Comment{
-		Slug: "/",
-	})
+
+	var comment comment.Comment
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		fmt.Fprintf(w, "Failed to decode JSON Body")
+	}
+
+	comment, err := h.Service.PostComment(comment)
 	if err != nil {
 		fmt.Fprintf(w, "Failed to post new comment")
 	}
@@ -101,9 +105,12 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	comment, err := h.Service.UpdateComment(1, comment.Comment{
-		Slug: "/new",
-	})
+	var comment comment.Comment
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		fmt.Fprintf(w, "Failed to decode JSON Body")
+	}
+
+	comment, err := h.Service.UpdateComment(1, comment)
 	if err != nil {
 		fmt.Fprintf(w, "Failed to update comment")
 	}
