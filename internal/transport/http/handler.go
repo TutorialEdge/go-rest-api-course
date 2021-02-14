@@ -40,7 +40,11 @@ func (h *Handler) SetupRoutes() {
 	h.Router.HandleFunc("/api/comment/{id}", h.DeleteComment).Methods("DELETE")
 
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "I am alive!")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(Response{Status: "Successfully Deleted"}); err != nil {
+			panic(err)
+		}
 	})
 }
 
