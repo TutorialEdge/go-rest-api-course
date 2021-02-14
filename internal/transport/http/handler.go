@@ -18,7 +18,8 @@ type Handler struct {
 
 // Response object
 type Response struct {
-	Status string
+	Message string
+	Error   string
 }
 
 // NewHandler - returns a pointer to a Handler
@@ -42,7 +43,7 @@ func (h *Handler) SetupRoutes() {
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(Response{Status: "Successfully Deleted"}); err != nil {
+		if err := json.NewEncoder(w).Encode(Response{Message: "I am Alive!"}); err != nil {
 			panic(err)
 		}
 	})
@@ -57,11 +58,11 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 
 	i, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		fmt.Fprintf(w, "Unable to parse UINT from ID")
+		sendErrorResponse(w, "Unable to parse UINT from ID", err)
 	}
 	comment, err := h.Service.GetComment(uint(i))
 	if err != nil {
-		fmt.Fprintf(w, "Error Retrieving Comment By ID")
+		sendErrorResponse(w, "Error Retrieving Comment By ID", err)
 	}
 
 	if err := json.NewEncoder(w).Encode(comment); err != nil {
@@ -75,7 +76,7 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	comments, err := h.Service.GetAllComments()
 	if err != nil {
-		fmt.Fprintf(w, "Failed to retrieve all comments")
+		sendErrorResponse(w, "Failed to retrieve all comments", err)
 	}
 	if err := json.NewEncoder(w).Encode(comments); err != nil {
 		panic(err)
@@ -89,12 +90,12 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 
 	var comment comment.Comment
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		fmt.Fprintf(w, "Failed to decode JSON Body")
+		sendErrorResponse(w, "Failed to decode JSON Body", err)
 	}
 
 	comment, err := h.Service.PostComment(comment)
 	if err != nil {
-		fmt.Fprintf(w, "Failed to post new comment")
+		sendErrorResponse(w, "Failed to post new comment", err)
 	}
 	if err := json.NewEncoder(w).Encode(comment); err != nil {
 		panic(err)
@@ -105,14 +106,22 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	var comment comment.Comment
-	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		fmt.Fprintf(w, "Failed to decode JSON Body")
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+	commentID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		sendErrorResponse(w, "Failed to parse uint from ID", err)
 	}
 
-	comment, err := h.Service.UpdateComment(1, comment)
+	var comment comment.Comment
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		sendErrorResponse(w, "Failed to decode JSON Body", err)
+	}
+
+	comment, err = h.Service.UpdateComment(uint(commentID), comment)
 	if err != nil {
-		fmt.Fprintf(w, "Failed to update comment")
+		sendErrorResponse(w, "Failed to update comment", err)
 	}
 	if err := json.NewEncoder(w).Encode(comment); err != nil {
 		panic(err)
@@ -127,15 +136,22 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 	commentID, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		fmt.Fprintf(w, "Failed to parse uint from ID")
+		sendErrorResponse(w, "Failed to parse uint from ID", err)
 	}
 
 	err = h.Service.DeleteComment(uint(commentID))
 	if err != nil {
-		fmt.Fprintf(w, "Failed to delete comment by comment ID")
+		sendErrorResponse(w, "Failed to delete comment by comment ID", err)
 	}
 
-	if err := json.NewEncoder(w).Encode(Response{Status: "Successfully Deleted"}); err != nil {
+	if err := json.NewEncoder(w).Encode(Response{Message: "Successfully Deleted"}); err != nil {
+		panic(err)
+	}
+}
+
+func sendErrorResponse(w http.ResponseWriter, message string, err error) {
+	w.WriteHeader(http.StatusInternalServerError)
+	if err := json.NewEncoder(w).Encode(Response{Message: message, Error: err.Error()}); err != nil {
 		panic(err)
 	}
 }
