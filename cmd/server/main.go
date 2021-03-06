@@ -45,7 +45,6 @@ func (app *App) Run() error {
 		return err
 	}
 
-	log.Info("App startup successful")
 	return nil
 }
 

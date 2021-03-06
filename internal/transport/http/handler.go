@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/TutorialEdge/go-rest-api-course/internal/comment"
 	"github.com/gorilla/mux"
@@ -29,10 +28,24 @@ func NewHandler(service *comment.Service) *Handler {
 	}
 }
 
+// LoggingMiddleware - a handy middleware function that logs out incoming requests
+func LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.WithFields(
+			log.Fields{
+				"Method": r.Method,
+				"Path":   r.URL.Path,
+			}).
+			Info("handled request")
+		next.ServeHTTP(w, r)
+	})
+}
+
 // SetupRoutes - sets up all the routes for our application
 func (h *Handler) SetupRoutes() {
 	log.Info("Setting Up Routes")
 	h.Router = mux.NewRouter()
+	h.Router.Use(LoggingMiddleware)
 
 	h.Router.HandleFunc("/api/comment", h.GetAllComments).Methods("GET")
 	h.Router.HandleFunc("/api/comment", h.PostComment).Methods("POST")
@@ -47,106 +60,6 @@ func (h *Handler) SetupRoutes() {
 			panic(err)
 		}
 	})
-}
-
-// GetComment - retrieve a comment by ID
-func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	i, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		sendErrorResponse(w, "Unable to parse UINT from ID", err)
-	}
-	comment, err := h.Service.GetComment(uint(i))
-	if err != nil {
-		sendErrorResponse(w, "Error Retrieving Comment By ID", err)
-	}
-
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
-		panic(err)
-	}
-}
-
-// GetAllComments - retrieves all comments from the comment service
-func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	comments, err := h.Service.GetAllComments()
-	if err != nil {
-		sendErrorResponse(w, "Failed to retrieve all comments", err)
-	}
-	if err := json.NewEncoder(w).Encode(comments); err != nil {
-		panic(err)
-	}
-}
-
-// PostComment - adds a new comment
-func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-
-	var comment comment.Comment
-	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		sendErrorResponse(w, "Failed to decode JSON Body", err)
-	}
-
-	comment, err := h.Service.PostComment(comment)
-	if err != nil {
-		sendErrorResponse(w, "Failed to post new comment", err)
-	}
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
-		panic(err)
-	}
-}
-
-// UpdateComment - updates a comment by ID
-func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-
-	vars := mux.Vars(r)
-	id := vars["id"]
-	commentID, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		sendErrorResponse(w, "Failed to parse uint from ID", err)
-	}
-
-	var comment comment.Comment
-	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		sendErrorResponse(w, "Failed to decode JSON Body", err)
-	}
-
-	comment, err = h.Service.UpdateComment(uint(commentID), comment)
-	if err != nil {
-		sendErrorResponse(w, "Failed to update comment", err)
-	}
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
-		panic(err)
-	}
-}
-
-// DeleteComment - deletes a comment by ID
-func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	vars := mux.Vars(r)
-	id := vars["id"]
-	commentID, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		sendErrorResponse(w, "Failed to parse uint from ID", err)
-	}
-
-	err = h.Service.DeleteComment(uint(commentID))
-	if err != nil {
-		sendErrorResponse(w, "Failed to delete comment by comment ID", err)
-	}
-
-	if err := json.NewEncoder(w).Encode(Response{Message: "Successfully Deleted"}); err != nil {
-		panic(err)
-	}
 }
 
 func sendErrorResponse(w http.ResponseWriter, message string, err error) {
