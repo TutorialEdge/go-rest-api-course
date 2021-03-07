@@ -59,12 +59,12 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(w, "Unable to parse UINT from ID")
 	}
-	comment, err := h.Service.GetComment(uint(i))
+	cmt, err := h.Service.GetComment(uint(i))
 	if err != nil {
 		fmt.Fprintf(w, "Error Retrieving Comment By ID")
 	}
 
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
+	if err := json.NewEncoder(w).Encode(cmt); err != nil {
 		panic(err)
 	}
 }
@@ -87,16 +87,16 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	var comment comment.Comment
-	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+	var cmt comment.Comment
+	if err := json.NewDecoder(r.Body).Decode(&cmt); err != nil {
 		fmt.Fprintf(w, "Failed to decode JSON Body")
 	}
 
-	comment, err := h.Service.PostComment(comment)
+	cmt, err := h.Service.PostComment(cmt)
 	if err != nil {
 		fmt.Fprintf(w, "Failed to post new comment")
 	}
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
+	if err := json.NewEncoder(w).Encode(cmt); err != nil {
 		panic(err)
 	}
 }
@@ -105,16 +105,23 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	var comment comment.Comment
-	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+	var cmt comment.Comment
+	if err := json.NewDecoder(r.Body).Decode(&cmt); err != nil {
 		fmt.Fprintf(w, "Failed to decode JSON Body")
 	}
 
-	comment, err := h.Service.UpdateComment(1, comment)
+	vars := mux.Vars(r)
+	id := vars["id"]
+	commentID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		fmt.Fprintf(w, "Failed to parse uint from ID")
+	}
+
+	cmt, err = h.Service.UpdateComment(uint(commentID), cmt)
 	if err != nil {
 		fmt.Fprintf(w, "Failed to update comment")
 	}
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
+	if err := json.NewEncoder(w).Encode(cmt); err != nil {
 		panic(err)
 	}
 }
