@@ -59,11 +59,11 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 
 	i, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		sendErrorResponse(w, "Unable to parse UINT from ID", err)
+		fmt.Fprintf(w, "Unable to parse UINT from ID", err)
 	}
 	comment, err := h.Service.GetComment(uint(i))
 	if err != nil {
-		sendErrorResponse(w, "Error Retrieving Comment By ID", err)
+		fmt.Fprintf(w, "Error Retrieving Comment By ID", err)
 	}
 
 	if err := json.NewEncoder(w).Encode(comment); err != nil {
@@ -78,11 +78,9 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 
 	comments, err := h.Service.GetAllComments()
 	if err != nil {
-		sendErrorResponse(w, "Failed to retrieve all comments", err)
+		fmt.Fprintf(w, "Failed to retrieve all comments", err)
 	}
-	if err := json.NewEncoder(w).Encode(comments); err != nil {
-		panic(err)
-	}
+	fmt.Fprintf(w, "%+v", comments)
 }
 
 // PostComment - adds a new comment
@@ -92,16 +90,14 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 
 	var comment comment.Comment
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		sendErrorResponse(w, "Failed to decode JSON Body", err)
+		fmt.Fprintf(w, "Failed to decode JSON Body", err)
 	}
 
 	comment, err := h.Service.PostComment(comment)
 	if err != nil {
-		sendErrorResponse(w, "Failed to post new comment", err)
+		fmt.Fprintf(w, "Failed to post new comment", err)
 	}
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
-		panic(err)
-	}
+	fmt.Fprintf(w, "%+v", comment)
 }
 
 // UpdateComment - updates a comment by ID
