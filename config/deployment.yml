@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-api
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      name: comments-api
+  template:
+    metadata:
+      labels:
+        name: comments-api
+    spec:
+      containers:
+      - name: application
+        image: "forbsey/comments-api:latest"
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8080
+        env:
+          - name: DB_PORT
+            value: "$DB_PORT"
+          - name: DB_HOST
+            value: "$DB_HOST"
+          - name: DB_PASSWORD
+            value: "$DB_PASSWORD"
+          - name: DB_TABLE
+            value: "$DB_TABLE"
+          - name: DB_USERNAME
+            value: "$DB_USERNAME"
+          - name: SSL_MODE
+            value: "require"
