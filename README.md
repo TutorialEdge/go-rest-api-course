@@ -1,3 +1,5 @@
+![Building a Production Ready REST API in Go Course Repository](https://images.tutorialedge.net/thumbnails/production-ready-rest-api-in-go.png)
+
 # Building a Production Ready REST API in Go - Course Materials
 
 This repo contains all of the source code for my course - [Building a Production Ready REST API in Go](https://tutorialedge.net/courses/go-rest-api-course/).
