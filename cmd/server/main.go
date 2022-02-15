@@ -28,8 +28,6 @@ func Run() error {
 
 	commentService := comment.NewService(store)
 	handler := transportHTTP.NewHandler(commentService)
-	handler.SetupRoutes()
-
 	if err := http.ListenAndServe(":8080", handler.Router); err != nil {
 		log.Error("Failed to set up server")
 		return err

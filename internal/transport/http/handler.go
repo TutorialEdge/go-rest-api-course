@@ -24,9 +24,31 @@ type Response struct {
 
 // NewHandler - returns a pointer to a Handler
 func NewHandler(service CommentService) *Handler {
+	var h Handler
+	h.Router = mux.NewRouter()
+	h.Router.Use(JSONMiddleware)
+	h.Router.Use(LoggingMiddleware)
+
+	h.mapRoutes()
 	return &Handler{
 		Service: service,
 	}
+}
+
+// mapRoutes - sets up all the routes for our application
+func (h *Handler) mapRoutes() {
+	h.Router.HandleFunc("/api/comment", h.GetAllComments).Methods("GET")
+	h.Router.HandleFunc("/api/comment", JWTAuth(h.PostComment)).Methods("POST")
+	h.Router.HandleFunc("/api/comment/{id}", h.GetComment).Methods("GET")
+	h.Router.HandleFunc("/api/comment/{id}", JWTAuth(h.UpdateComment)).Methods("PUT")
+	h.Router.HandleFunc("/api/comment/{id}", JWTAuth(h.DeleteComment)).Methods("DELETE")
+	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(Response{Message: "I am Alive!"}); err != nil {
+			panic(err)
+		}
+	})
 }
 
 // validateToken - validates an incoming jwt token
@@ -66,26 +88,4 @@ func JWTAuth(original func(w http.ResponseWriter, r *http.Request)) func(w http.
 			return
 		}
 	}
-}
-
-// SetupRoutes - sets up all the routes for our application
-func (h *Handler) SetupRoutes() {
-	log.Info("Setting Up Routes")
-	h.Router = mux.NewRouter()
-	h.Router.Use(JSONMiddleware)
-	h.Router.Use(LoggingMiddleware)
-
-	h.Router.HandleFunc("/api/comment", h.GetAllComments).Methods("GET")
-	h.Router.HandleFunc("/api/comment", JWTAuth(h.PostComment)).Methods("POST")
-	h.Router.HandleFunc("/api/comment/{id}", h.GetComment).Methods("GET")
-	h.Router.HandleFunc("/api/comment/{id}", JWTAuth(h.UpdateComment)).Methods("PUT")
-	h.Router.HandleFunc("/api/comment/{id}", JWTAuth(h.DeleteComment)).Methods("DELETE")
-
-	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(Response{Message: "I am Alive!"}); err != nil {
-			panic(err)
-		}
-	})
 }

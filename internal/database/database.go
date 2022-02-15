@@ -29,7 +29,6 @@ func NewDatabase() (*Database, error) {
 
 	db, err := sqlx.Connect("postgres", connectionString)
 	if err != nil {
-		log.Fatalln(err)
 		return &Database{}, fmt.Errorf("could not connect to database: %w", err)
 	}
 

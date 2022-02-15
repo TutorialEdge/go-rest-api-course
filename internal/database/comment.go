@@ -2,8 +2,13 @@ package database
 
 import (
 	"context"
+	"errors"
 
 	"github.com/TutorialEdge/go-rest-api-course/internal/models"
+)
+
+var (
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 // CommentRow - models how our comments look in the database
@@ -20,22 +25,22 @@ func (d *Database) GetComment(ctx context.Context, uuid string) (models.Comment,
 
 	var cmt models.Comment
 	// sqlx with context
-	return cmt, nil
+	return cmt, ErrNotImplemented
 }
 
 // GetCommentsBySlug -
 func (d *Database) GetCommentsBySlug(ctx context.Context, slug string) ([]models.Comment, error) {
-	return []models.Comment{}, nil
+	return []models.Comment{}, ErrNotImplemented
 }
 
 func (d *Database) PostComment(ctx context.Context) (models.Comment, error) {
-	return models.Comment{}, nil
+	return models.Comment{}, ErrNotImplemented
 }
 
 func (d *Database) UpdateComment(ctx context.Context) (models.Comment, error) {
-	return models.Comment{}, nil
+	return models.Comment{}, ErrNotImplemented
 }
 
 func (d *Database) DeleteComment(ctx context.Context) error {
-	return nil
+	return ErrNotImplemented
 }
