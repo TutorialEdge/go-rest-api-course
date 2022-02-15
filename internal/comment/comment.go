@@ -41,6 +41,7 @@ func NewService(store CommentStore) *Service {
 
 // GetComment - retrieves comments by their ID from the database
 func (s *Service) GetComment(ctx context.Context, ID string) (Comment, error) {
+	// calls store passing in the context
 	return Comment{}, ErrNotImplemented
 }
 

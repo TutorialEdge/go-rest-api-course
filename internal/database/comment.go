@@ -24,7 +24,7 @@ func (d *Database) GetComment(ctx context.Context, uuid string) (comment.Comment
 	// fetch CommentRow from the database and then convert to comment.Comment
 
 	var cmt comment.Comment
-	// sqlx with context
+	// sqlx with context to ensure context cancelation is honoured
 	return cmt, ErrNotImplemented
 }
 

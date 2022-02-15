@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/TutorialEdge/go-rest-api-course/internal/comment"
 	"github.com/TutorialEdge/go-rest-api-course/internal/database"
 	transportHTTP "github.com/TutorialEdge/go-rest-api-course/internal/transport/http"
@@ -28,8 +26,9 @@ func Run() error {
 
 	commentService := comment.NewService(store)
 	handler := transportHTTP.NewHandler(commentService)
-	if err := http.ListenAndServe(":8080", handler.Router); err != nil {
-		log.Error("Failed to set up server")
+
+	if err := handler.Serve(); err != nil {
+		log.Error("failed to gracefully serve our application")
 		return err
 	}
 

@@ -1,16 +1,22 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 // Handler - stores pointer to our comments service
 type Handler struct {
 	Router  *mux.Router
 	Service CommentService
+	Server  *http.Server
 }
 
 // Response objecgi
@@ -20,15 +26,28 @@ type Response struct {
 
 // NewHandler - returns a pointer to a Handler
 func NewHandler(service CommentService) *Handler {
-	var h Handler
+	var h *Handler
 	h.Router = mux.NewRouter()
+	// Sets up our middleware functions
 	h.Router.Use(JSONMiddleware)
+	// we also want to log every incoming request
 	h.Router.Use(LoggingMiddleware)
 
+	// We want to timeout all requests that take longer than 15 seconds
+	h.Router.Use(TimeoutMiddleware)
+
+	// set up the routes
 	h.mapRoutes()
-	return &Handler{
-		Service: service,
+
+	h.Server = &http.Server{
+		// Good practice to set timeouts to avoid Slowloris attacks.
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler:      h.Router,
 	}
+	// return our wonderful handler
+	return h
 }
 
 // mapRoutes - sets up all the routes for our application
@@ -45,4 +64,24 @@ func (h *Handler) mapRoutes() {
 			panic(err)
 		}
 	})
+}
+
+func (h *Handler) Serve() error {
+	go func() {
+		if err := h.Server.ListenAndServe(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+
+	// Create a deadline to wait for
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	h.Server.Shutdown(ctx)
+
+	log.Println("shutting down gracefully")
+	return nil
 }
