@@ -6,19 +6,19 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/TutorialEdge/go-rest-api-course/internal/models"
+	"github.com/TutorialEdge/go-rest-api-course/internal/comment"
 	"github.com/gorilla/mux"
 
 	"github.com/go-playground/validator/v10"
 )
 
 type CommentService interface {
-	GetComment(ctx context.Context, ID string) (models.Comment, error)
-	GetCommentsBySlug(ctx context.Context, slug string) ([]models.Comment, error)
-	PostComment(ctx context.Context, cmt models.Comment) (models.Comment, error)
-	UpdateComment(ctx context.Context, ID string, newCmt models.Comment) (models.Comment, error)
+	GetComment(ctx context.Context, ID string) (comment.Comment, error)
+	GetCommentsBySlug(ctx context.Context, slug string) ([]comment.Comment, error)
+	PostComment(ctx context.Context, cmt comment.Comment) (comment.Comment, error)
+	UpdateComment(ctx context.Context, ID string, newCmt comment.Comment) (comment.Comment, error)
 	DeleteComment(ctx context.Context, ID string) error
-	GetAllComments(ctx context.Context) ([]models.Comment, error)
+	GetAllComments(ctx context.Context) ([]comment.Comment, error)
 }
 
 // GetComment - retrieve a comment by ID
@@ -54,8 +54,8 @@ type PostCommentRequest struct {
 	Body   string `json:"body" validate:"required"`
 }
 
-func commentFromPostCommentRequest(u PostCommentRequest) models.Comment {
-	return models.Comment{
+func commentFromPostCommentRequest(u PostCommentRequest) comment.Comment {
+	return comment.Comment{
 		Slug:   u.Slug,
 		Author: u.Author,
 		Body:   u.Body,
@@ -97,8 +97,8 @@ type UpdateCommentRequest struct {
 
 // convert the validated struct into something that the service layer understands
 // this is a little verbose, but it allows us to remove tight coupling between our components
-func commentFromUpdateCommentRequest(u UpdateCommentRequest) models.Comment {
-	return models.Comment{
+func commentFromUpdateCommentRequest(u UpdateCommentRequest) comment.Comment {
+	return comment.Comment{
 		Slug:   u.Slug,
 		Author: u.Author,
 		Body:   u.Body,

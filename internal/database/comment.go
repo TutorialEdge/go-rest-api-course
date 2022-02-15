@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/TutorialEdge/go-rest-api-course/internal/models"
+	"github.com/TutorialEdge/go-rest-api-course/internal/comment"
 )
 
 var (
@@ -20,25 +20,25 @@ type CommentRow struct {
 }
 
 // GetComment - retrieves a comment from the database by ID
-func (d *Database) GetComment(ctx context.Context, uuid string) (models.Comment, error) {
-	// fetch CommentRow from the database and then convert to models.Comment
+func (d *Database) GetComment(ctx context.Context, uuid string) (comment.Comment, error) {
+	// fetch CommentRow from the database and then convert to comment.Comment
 
-	var cmt models.Comment
+	var cmt comment.Comment
 	// sqlx with context
 	return cmt, ErrNotImplemented
 }
 
 // GetCommentsBySlug -
-func (d *Database) GetCommentsBySlug(ctx context.Context, slug string) ([]models.Comment, error) {
-	return []models.Comment{}, ErrNotImplemented
+func (d *Database) GetCommentsBySlug(ctx context.Context, slug string) ([]comment.Comment, error) {
+	return []comment.Comment{}, ErrNotImplemented
 }
 
-func (d *Database) PostComment(ctx context.Context) (models.Comment, error) {
-	return models.Comment{}, ErrNotImplemented
+func (d *Database) PostComment(ctx context.Context) (comment.Comment, error) {
+	return comment.Comment{}, ErrNotImplemented
 }
 
-func (d *Database) UpdateComment(ctx context.Context) (models.Comment, error) {
-	return models.Comment{}, ErrNotImplemented
+func (d *Database) UpdateComment(ctx context.Context) (comment.Comment, error) {
+	return comment.Comment{}, ErrNotImplemented
 }
 
 func (d *Database) DeleteComment(ctx context.Context) error {
