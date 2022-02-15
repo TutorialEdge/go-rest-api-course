@@ -1,90 +1,64 @@
 package comment
 
-import "github.com/jinzhu/gorm"
+import (
+	"context"
+	"errors"
+
+	"github.com/TutorialEdge/go-rest-api-course/internal/models"
+)
+
+var (
+	ErrFetchingComment = errors.New("could not fetch comment by ID")
+	ErrUpdatingComment = errors.New("could not update comment")
+	ErrNoCommentFound  = errors.New("no comment found")
+	ErrDeletingComment = errors.New("could not delete comment")
+	ErrNotImplemented  = errors.New("not implemented")
+)
+
+// CommentStore - defines the interface we need our comment storage
+// layer to implement
+type CommentStore interface {
+	GetComment(context.Context, string) (models.Comment, error)
+}
 
 // Service - the struct for our comment service
 type Service struct {
-	DB *gorm.DB
-}
-
-// Comment - defines our comment structure
-type Comment struct {
-	gorm.Model
-	Slug   string
-	Body   string
-	Author string
-}
-
-// CommentService - the interface for our comment service
-type CommentService interface {
-	GetComment(ID uint) (Comment, error)
-	GetCommentsBySlug(slug string) ([]Comment, error)
-	PostComment(comment Comment) (Comment, error)
-	UpdateComment(ID uint, newComment Comment) (Comment, error)
-	DeleteComment(ID uint) error
-	GetAllComments() ([]Comment, error)
+	Store CommentStore
 }
 
 // NewService - returns a new comment service
-func NewService(db *gorm.DB) *Service {
+func NewService(store CommentStore) *Service {
 	return &Service{
-		DB: db,
+		Store: store,
 	}
 }
 
 // GetComment - retrieves comments by their ID from the database
-func (s *Service) GetComment(ID uint) (Comment, error) {
-	var comment Comment
-	if result := s.DB.First(&comment, ID); result.Error != nil {
-		return Comment{}, result.Error
-	}
-	return comment, nil
+func (s *Service) GetComment(ctx context.Context, ID string) (models.Comment, error) {
+	return models.Comment{}, ErrNotImplemented
 }
 
 // GetCommentsBySlug - retrieves all comments by slug (path - /article/name/)
-func (s *Service) GetCommentsBySlug(slug string) ([]Comment, error) {
-	var comments []Comment
-	if result := s.DB.Find(&comments).Where("slug = ?", slug); result.Error != nil {
-		return []Comment{}, result.Error
-	}
-	return comments, nil
+func (s *Service) GetCommentsBySlug(ctx context.Context, slug string) ([]models.Comment, error) {
+	return []models.Comment{}, ErrNotImplemented
 }
 
 // PostComment - adds a new comment to the database
-func (s *Service) PostComment(comment Comment) (Comment, error) {
-	if result := s.DB.Save(&comment); result.Error != nil {
-		return Comment{}, result.Error
-	}
-	return comment, nil
+func (s *Service) PostComment(ctx context.Context, cmt models.Comment) (models.Comment, error) {
+	return models.Comment{}, ErrNotImplemented
 }
 
 // UpdateComment - updates a comment by ID with new comment info
-func (s *Service) UpdateComment(ID uint, newComment Comment) (Comment, error) {
-	comment, err := s.GetComment(ID)
-	if err != nil {
-		return Comment{}, err
-	}
-
-	if result := s.DB.Model(&comment).Updates(newComment); result.Error != nil {
-		return Comment{}, result.Error
-	}
-
-	return comment, nil
+func (s *Service) UpdateComment(ctx context.Context, ID string, newComment models.Comment) (models.Comment, error) {
+	return models.Comment{}, ErrNotImplemented
 }
 
 // DeleteComment - deletes a comment from the database by ID
-func (s *Service) DeleteComment(ID uint) error {
-	if result := s.DB.Delete(&Comment{}, ID); result.Error != nil {
-		return result.Error
-	}
-	return nil
+func (s *Service) DeleteComment(ctx context.Context, ID string) error {
+	return ErrNotImplemented
 }
 
 // GetAllComments - retrieves all comments from the database
-func (s *Service) GetAllComments() ([]Comment, error) {
-	var comments []Comment
-	if result := s.DB.Find(&comments); result.Error != nil {
-		return comments, result.Error
-	}
-	return comments, nil
+func (s *Service) GetAllComments(ctx context.Context) ([]models.Comment, error) {
+	return []models.Comment{}, ErrNotImplemented
 }

@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -v ./... 
+  
+  test:
+    cmds:
+      - go test -v ./...
+
+  lint:
+    cmds:
+      - golangci-lint run
+
+  acceptance-test:
+    cmds:
+      - docker-compose up --build
+      - go test -tags=e2e -v ./...

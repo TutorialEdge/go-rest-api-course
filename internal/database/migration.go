@@ -1,14 +1,10 @@
 package database
 
 import (
-	"github.com/TutorialEdge/go-rest-api-course/internal/comment"
-	"github.com/jinzhu/gorm"
+	"errors"
 )
 
-// MigrateDB - migrates our database and creates our comment table
-func MigrateDB(db *gorm.DB) error {
-	if result := db.AutoMigrate(&comment.Comment{}); result.Error != nil {
-		return result.Error
-	}
-	return nil
+// MigrateDB - runs all migrations in the migrations
+func (d *Database) MigrateDB() error {
+	return errors.New("unimplemented")
 }
