@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -19,19 +20,29 @@ type CommentService interface {
 	UpdateComment(ctx context.Context, ID string, newCmt comment.Comment) (comment.Comment, error)
 	DeleteComment(ctx context.Context, ID string) error
 	GetAllComments(ctx context.Context) ([]comment.Comment, error)
+	ReadyCheck(ctx context.Context) error
 }
 
 // GetComment - retrieve a comment by ID
 func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-
-	comment, err := h.Service.GetComment(r.Context(), id)
-	if err != nil {
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(comment); err != nil {
+	cmt, err := h.Service.GetComment(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, comment.ErrFetchingComment) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(cmt); err != nil {
 		panic(err)
 	}
 }

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -35,4 +36,8 @@ func NewDatabase() (*Database, error) {
 	return &Database{
 		Client: db,
 	}, nil
+}
+
+func (d *Database) Ping(ctx context.Context) error {
+	return d.Client.DB.PingContext(ctx)
 }

@@ -20,7 +20,6 @@ func TimeoutMiddleware(next http.Handler) http.Handler {
 		// TODO: extract the timeout value into configuration
 		ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 		defer cancel()
-
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

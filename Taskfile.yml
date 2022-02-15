@@ -17,6 +17,14 @@ tasks:
     cmds:
       - docker-compose up --build
 
+  tidy:
+    cmds:
+      - go mod tidy
+
+  vendor:
+    cmds:
+      - go mod vendor
+
   acceptance-test:
     cmds:
       - docker-compose up --build

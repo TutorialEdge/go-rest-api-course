@@ -16,6 +16,7 @@ func Run() error {
 	var err error
 	store, err := database.NewDatabase()
 	if err != nil {
+		log.Error("failed to setup connection to the database")
 		return err
 	}
 	err = store.MigrateDB()

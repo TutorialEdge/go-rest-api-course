@@ -3,6 +3,8 @@ package comment
 import (
 	"context"
 	"errors"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -25,6 +27,7 @@ type Comment struct {
 // layer to implement
 type CommentStore interface {
 	GetComment(context.Context, string) (Comment, error)
+	Ping(context.Context) error
 }
 
 // Service - the struct for our comment service
@@ -42,7 +45,12 @@ func NewService(store CommentStore) *Service {
 // GetComment - retrieves comments by their ID from the database
 func (s *Service) GetComment(ctx context.Context, ID string) (Comment, error) {
 	// calls store passing in the context
-	return Comment{}, ErrNotImplemented
+	cmt, err := s.Store.GetComment(ctx, ID)
+	if err != nil {
+		log.Errorf("an error occured fetching the comment: %w", err)
+		return Comment{}, ErrFetchingComment
+	}
+	return cmt, nil
 }
 
 // GetCommentsBySlug - retrieves all comments by slug (path - /article/name/)
@@ -68,4 +76,10 @@ func (s *Service) DeleteComment(ctx context.Context, ID string) error {
 // GetAllComments - retrieves all comments from the database
 func (s *Service) GetAllComments(ctx context.Context) ([]Comment, error) {
 	return []Comment{}, ErrNotImplemented
+}
+
+// ReadyCheck - a function that tests we are functionally ready to serve requests
+func (s *Service) ReadyCheck(ctx context.Context) error {
+	log.Info("Checking readiness")
+	return s.Store.Ping(ctx)
 }
