@@ -47,7 +47,7 @@ func (s *Service) GetComment(ctx context.Context, ID string) (Comment, error) {
 	// calls store passing in the context
 	cmt, err := s.Store.GetComment(ctx, ID)
 	if err != nil {
-		log.Errorf("an error occured fetching the comment: %w", err)
+		log.Errorf("an error occured fetching the comment: %s", err.Error())
 		return Comment{}, ErrFetchingComment
 	}
 	return cmt, nil
