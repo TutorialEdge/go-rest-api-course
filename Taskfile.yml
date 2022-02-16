@@ -40,5 +40,5 @@ tasks:
 
   acceptance-test:
     cmds:
-      - docker-compose up --build
+      - docker-compose up -d --build
       - go test -tags=e2e -v ./...
