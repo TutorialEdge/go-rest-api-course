@@ -17,16 +17,19 @@ var (
 
 // Comment - defines our comment structure
 type Comment struct {
-	ID     string
-	Slug   string
-	Body   string
-	Author string
+	ID     string `json:"id"`
+	Slug   string `json:"slug"`
+	Body   string `json:"body"`
+	Author string `json:"author"`
 }
 
 // CommentStore - defines the interface we need our comment storage
 // layer to implement
 type CommentStore interface {
 	GetComment(context.Context, string) (Comment, error)
+	PostComment(context.Context, Comment) (Comment, error)
+	UpdateComment(context.Context, string, Comment) (Comment, error)
+	DeleteComment(context.Context, string) error
 	Ping(context.Context) error
 }
 
@@ -53,29 +56,29 @@ func (s *Service) GetComment(ctx context.Context, ID string) (Comment, error) {
 	return cmt, nil
 }
 
-// GetCommentsBySlug - retrieves all comments by slug (path - /article/name/)
-func (s *Service) GetCommentsBySlug(ctx context.Context, slug string) ([]Comment, error) {
-	return []Comment{}, ErrNotImplemented
-}
-
 // PostComment - adds a new comment to the database
 func (s *Service) PostComment(ctx context.Context, cmt Comment) (Comment, error) {
-	return Comment{}, ErrNotImplemented
+	cmt, err := s.Store.PostComment(ctx, cmt)
+	if err != nil {
+		log.Errorf("an error occurred adding the comment: %s", err.Error())
+	}
+	return cmt, nil
 }
 
 // UpdateComment - updates a comment by ID with new comment info
-func (s *Service) UpdateComment(ctx context.Context, ID string, newComment Comment) (Comment, error) {
-	return Comment{}, ErrNotImplemented
+func (s *Service) UpdateComment(
+	ctx context.Context, ID string, newComment Comment,
+) (Comment, error) {
+	cmt, err := s.Store.UpdateComment(ctx, ID, newComment)
+	if err != nil {
+		log.Errorf("an error occurred updating the comment: %s", err.Error())
+	}
+	return cmt, nil
 }
 
 // DeleteComment - deletes a comment from the database by ID
 func (s *Service) DeleteComment(ctx context.Context, ID string) error {
-	return ErrNotImplemented
-}
-
-// GetAllComments - retrieves all comments from the database
-func (s *Service) GetAllComments(ctx context.Context) ([]Comment, error) {
-	return []Comment{}, ErrNotImplemented
+	return s.Store.DeleteComment(ctx, ID)
 }
 
 // ReadyCheck - a function that tests we are functionally ready to serve requests

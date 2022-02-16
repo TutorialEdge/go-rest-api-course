@@ -53,7 +53,7 @@ func TestCommentDatabase(t *testing.T) {
 		assert.NoError(t, err)
 
 		cmt.Slug = "new-slug"
-		cmt, err = db.UpdateComment(context.Background(), cmt)
+		cmt, err = db.UpdateComment(context.Background(), cmt.ID, cmt)
 		assert.NoError(t, err)
 
 		newCmt, err := db.GetComment(context.Background(), cmt.ID)

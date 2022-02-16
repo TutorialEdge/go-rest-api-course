@@ -4,22 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/TutorialEdge/go-rest-api-course/internal/comment"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-playground/validator/v10"
 )
 
 type CommentService interface {
 	GetComment(ctx context.Context, ID string) (comment.Comment, error)
-	GetCommentsBySlug(ctx context.Context, slug string) ([]comment.Comment, error)
 	PostComment(ctx context.Context, cmt comment.Comment) (comment.Comment, error)
 	UpdateComment(ctx context.Context, ID string, newCmt comment.Comment) (comment.Comment, error)
 	DeleteComment(ctx context.Context, ID string) error
-	GetAllComments(ctx context.Context) ([]comment.Comment, error)
 	ReadyCheck(ctx context.Context) error
 }
 
@@ -43,17 +41,6 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewEncoder(w).Encode(cmt); err != nil {
-		panic(err)
-	}
-}
-
-// GetAllComments - retrieves all comments from the comment service
-func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
-	comments, err := h.Service.GetAllComments(r.Context())
-	if err != nil {
-		return
-	}
-	if err := json.NewEncoder(w).Encode(comments); err != nil {
 		panic(err)
 	}
 }
@@ -83,15 +70,15 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(postCmtReq)
 	if err != nil {
-		log.Println(err)
+		log.Info(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	cmt := commentFromPostCommentRequest(postCmtReq)
-
 	cmt, err = h.Service.PostComment(r.Context(), cmt)
 	if err != nil {
+		log.Error(err)
 		return
 	}
 	if err := json.NewEncoder(w).Encode(cmt); err != nil {
@@ -138,6 +125,7 @@ func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 
 	cmt, err = h.Service.UpdateComment(r.Context(), commentID, cmt)
 	if err != nil {
+		log.Error(err.Error())
 		return
 	}
 	if err := json.NewEncoder(w).Encode(cmt); err != nil {
