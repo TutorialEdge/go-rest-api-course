@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -o app cmd/server/main.go
+
+  test:
+    cmds:
+      - go test -v ./...
+
+  lint:
+    cmds:
+      - golangci-lint run
+
+  run:
+    cmds:
+      - docker-compose up --build
