@@ -6,6 +6,37 @@ This repo contains all of the source code for my course - [Building a Production
 
 > Join the TutorialEdge clan for the low cost of $4.99 a month to gain access to all of the courses on the site - [Pricing](https://tutorialedge.net/pricing)
 
+
+## Application Overview
+
+I've designed the code in this course to follow clean architecture principles.
+
+We'll be building a layered app with 3 distinct layers:
+
+* **The Transport Layer** - responsible for handling incoming HTTP requests and passing them on to the relevant service functions.
+* **The Service Layer** - responsible for all the business logic in your application.
+* **The Repository Layer** - responsible for all the interactions with the database!
+
+This ends up looking something like this:
+
+![Architecture Overview](docs/architecture-diagram.png)
+
+## Technologies Used:
+
+* **Postgres**
+* **Docker + Docker-Compose**
+* **Go** (This one was fairly obvious no?)
+* **Postman** - for testing our service manually with HTTP request.
+
+## Frameworks + Libraries Used
+
+* **sqlx** - for simplifying our interactions with the database
+* **golang-migrate** - for running our migrations on app startup
+* **dgrijalva/jwt-go** - for working with JWTs in our transport layer.
+* **satori/go.uuid** - for generating and working with UUIDs.
+* **sirupsen/logrus** - nicer logging.
+* **stretchr/testify** - For easier testing!
+
 ## Support 
 
-Have any support issues or follow up questions? Join us on the TutorialEdge Clan discord and get real-time support for all of your Go needs!
+Have any support issues or follow-up questions? Join us on the TutorialEdge Clan discord and get real-time support for all of your Go needs!
