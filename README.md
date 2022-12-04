@@ -4,8 +4,7 @@
 
 This repo contains all of the source code for my course - [Building a Production Ready REST API in Go](https://tutorialedge.net/courses/go-rest-api-course/).
 
-> Join the TutorialEdge clan for the low cost of $4.99 a month to gain access to all of the courses on the site - [Pricing](https://tutorialedge.net/pricing)
-
+> Join the TutorialEdge clan for the cost of $12.99 a month to gain access to all of the courses on the site - [Pricing](https://tutorialedge.net/pricing)
 
 ## Application Overview
 
@@ -36,6 +35,10 @@ This ends up looking something like this:
 * **satori/go.uuid** - for generating and working with UUIDs.
 * **sirupsen/logrus** - nicer logging.
 * **stretchr/testify** - For easier testing!
+
+## Prerequisites
+
+This course is designed to help teach you one approach for building and structuring a production-ready REST API in Go. It's designed for people with some Go already, I wont be covering the basic syntax for Go, but mostly focused on higher-level topics.
 
 ## Support 
 
