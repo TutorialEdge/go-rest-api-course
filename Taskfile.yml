@@ -1,0 +1,44 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -v ./... 
+  
+  test:
+    cmds:
+      - go test -v ./...
+
+  lint:
+    cmds:
+      - golangci-lint run
+
+  run:
+    cmds:
+      - docker-compose up --build
+
+  tidy:
+    cmds:
+      - go mod tidy
+
+  vendor:
+    cmds:
+      - go mod vendor
+
+  integration-test:
+    cmds:
+      - docker-compose up -d db
+      - go test -tags=integration -v ./...
+    env:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_TABLE: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_DB: postgres
+      SSL_MODE: disable
+
+  acceptance-test:
+    cmds:
+      - docker-compose up -d --build
+      - go test -tags=e2e -v ./...
