@@ -1,14 +1,30 @@
 package database
 
 import (
-	"github.com/TutorialEdge/go-rest-api-course/internal/comment"
-	"github.com/jinzhu/gorm"
+	"fmt"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 )
 
-// MigrateDB - migrates our database and creates our comment table
-func MigrateDB(db *gorm.DB) error {
-	if result := db.AutoMigrate(&comment.Comment{}); result.Error != nil {
-		return result.Error
+// MigrateDB - runs all migrations in the migrations
+func (d *Database) MigrateDB() error {
+	log.Info("migrating our database")
+	driver, err := postgres.WithInstance(d.Client.DB, &postgres.Config{})
+	if err != nil {
+		return fmt.Errorf("could not create the postgres driver: %w", err)
 	}
+	m, err := migrate.NewWithDatabaseInstance(
+		"file:///migrations",
+		"postgres", driver)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+	m.Up()
+
 	return nil
 }
